@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobox Studio - Booking System</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -26,6 +29,7 @@
 </head>
 <body class="bg-brand-black text-white font-sans antialiased min-h-screen pb-12">
 
+    <!-- Header -->
     <header class="border-b border-zinc-800 py-6 px-4 mb-8">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div>
@@ -40,12 +44,14 @@
         </div>
     </header>
 
+    <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4">
         
+        <!-- Legend & Filter Tanggal -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-brand-card p-4 rounded-xl border border-zinc-800">
             <div>
                 <label class="block text-xs font-medium text-brand-textMuted mb-1">PILIH TANGGAL</label>
-                <input type="date" id="bookingDate" class="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg p-2.5 focus:ring-brand-green focus:border-brand-green outline-none">
+                <input type="date" id="bookingDate" onchange="fetchBookedSlots()" class="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg p-2.5 focus:ring-brand-green focus:border-brand-green outline-none">
             </div>
             <div class="flex items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
@@ -63,12 +69,15 @@
             </div>
         </div>
 
+        <!-- Grid Slot Waktu -->
         <section>
             <h2 class="text-sm font-semibold tracking-wider text-brand-textMuted mb-3 uppercase">Pilih Sesi Jam</h2>
             <div id="slotsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
-                </div>
+                <!-- Slot jam di-generate via JavaScript -->
+            </div>
         </section>
 
+        <!-- Sticky Bottom Bar -->
         <div id="actionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xl bg-zinc-900/90 backdrop-blur-md border border-brand-green/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between hidden">
             <div>
                 <p class="text-xs text-brand-textMuted">Sesi Terpilih:</p>
@@ -81,6 +90,7 @@
 
     </main>
 
+    <!-- Modal Form & QRIS -->
     <div id="checkoutModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-brand-card border border-zinc-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-textMuted hover:text-white">✕</button>
@@ -88,14 +98,14 @@
             <h3 class="text-xl font-bold text-white mb-1">Konfirmasi Booking</h3>
             <p class="text-xs text-brand-textMuted mb-6">Isi data diri untuk mendapatkan QRIS DOKU</p>
 
-            <form id="bookingForm" onsubmit="handlePayment(event)" class="space-y-4">
+            <form id="bookingForm" onsubmit="handleBookingSubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Nama Lengkap</label>
-                    <input type="text" required placeholder="John Doe" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm text-white focus:border-brand-green outline-none">
+                    <input type="text" id="custName" required placeholder="John Doe" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm text-white focus:border-brand-green outline-none">
                 </div>
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Nomor WhatsApp</label>
-                    <input type="tel" required placeholder="08123456789" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm text-white focus:border-brand-green outline-none">
+                    <input type="tel" id="custPhone" required placeholder="08123456789" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm text-white focus:border-brand-green outline-none">
                 </div>
 
                 <div class="border-t border-b border-zinc-800 py-3 my-2 space-y-1">
@@ -109,7 +119,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-brand-green hover:bg-brand-greenHover text-black font-bold py-3 rounded-xl transition text-sm">
+                <button type="submit" id="payBtn" class="w-full bg-brand-green hover:bg-brand-greenHover text-black font-bold py-3 rounded-xl transition text-sm">
                     Bayar via QRIS (DOKU)
                 </button>
             </form>
@@ -119,21 +129,48 @@
                 <div class="bg-white p-4 rounded-xl inline-block mb-4">
                     <img id="qrisImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=DOKU_QRIS_DEMO" alt="QRIS DOKU" class="w-44 h-44">
                 </div>
-                <p class="text-xs text-brand-green animate-pulse">Menunggu konfirmasi pembayaran...</p>
+                <p class="text-xs text-brand-green animate-pulse">Memproses konfirmasi booking...</p>
             </div>
         </div>
     </div>
 
+    <!-- JavaScript Integrasi Supabase -->
     <script>
-        // Set Default Date ke Hari Ini
-        document.getElementById('bookingDate').valueAsDate = new Date();
+        // Inisialisasi Supabase Client
+        const SUPABASE_URL = 'https://yofdfbqogzenvzwyqwcq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5t-m112GtGpHw7rWMZm1-Q_56iBpT--';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let selectedSlot = null;
+        let bookedSlots = [];
 
-        // Simulasi Data Slot yang Sudah di-Booked oleh orang lain
-        const dummyBookedSlots = ["09:15", "10:00", "10:15", "14:30", "19:00"];
+        // Set Default Date Ke Hari Ini
+        document.getElementById('bookingDate').valueAsDate = new Date();
 
-        // Generate Slot Jam 08.00 - 22.00 (Interval 15 Menit)
+        // Ambil Data Booking dari Database Supabase
+        async function fetchBookedSlots() {
+            const selectedDate = document.getElementById('bookingDate').value;
+            
+            const { data, error } = await supabaseClient
+                .from('bookings')
+                .select('time_slot')
+                .eq('booking_date', selectedDate);
+
+            if (error) {
+                console.error('Error fetching slots:', error);
+                bookedSlots = [];
+            } else {
+                bookedSlots = data.map(item => item.time_slot);
+            }
+
+            // Reset seleksi slot saat ini jika mengganti tanggal
+            selectedSlot = null;
+            document.getElementById('actionBar').classList.add('hidden');
+            
+            generateSlots();
+        }
+
+        // Render Slot Jam 08:00 - 22:00
         function generateSlots() {
             const grid = document.getElementById('slotsGrid');
             grid.innerHTML = '';
@@ -146,7 +183,7 @@
                 let mins = (time % 60).toString().padStart(2, '0');
                 let timeString = `${hours}:${mins}`;
 
-                let isBooked = dummyBookedSlots.includes(timeString);
+                let isBooked = bookedSlots.includes(timeString);
 
                 let btn = document.createElement('button');
                 btn.type = 'button';
@@ -165,7 +202,7 @@
             }
         }
 
-        // Fungsi Pilih Slot
+        // Pilih Slot Jam
         function selectSlot(time, element) {
             document.querySelectorAll('.slot-btn').forEach(el => {
                 el.classList.remove('bg-brand-green', 'text-black', 'font-bold');
@@ -188,14 +225,49 @@
             document.getElementById('checkoutModal').classList.add('hidden');
         }
 
-        // Simulasi Generate QRIS DOKU
-        function handlePayment(e) {
+        // Simpan Data Booking Ke Supabase
+        async function handleBookingSubmit(e) {
             e.preventDefault();
-            document.getElementById('bookingForm').classList.add('hidden');
-            document.getElementById('qrisContainer').classList.remove('hidden');
+
+            const payBtn = document.getElementById('payBtn');
+            payBtn.innerText = "Memproses...";
+            payBtn.disabled = true;
+
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const date = document.getElementById('bookingDate').value;
+
+            // Masukkan data ke tabel bookings Supabase
+            const { data, error } = await supabaseClient
+                .from('bookings')
+                .insert([
+                    {
+                        booking_date: date,
+                        time_slot: selectedSlot,
+                        customer_name: name,
+                        customer_phone: phone,
+                        status: 'booked'
+                    }
+                ]);
+
+            if (error) {
+                alert('Gagal melakukan booking: ' + error.message);
+                payBtn.innerText = "Bayar via QRIS (DOKU)";
+                payBtn.disabled = false;
+            } else {
+                // Tampilkan Tampilan QRIS
+                document.getElementById('bookingForm').classList.add('hidden');
+                document.getElementById('qrisContainer').classList.remove('hidden');
+
+                // Refresh slot secara realtime
+                setTimeout(() => {
+                    fetchBookedSlots();
+                }, 2000);
+            }
         }
 
-        generateSlots();
+        // Load data awal saat halaman pertama kali dibuka
+        fetchBookedSlots();
     </script>
 </body>
 </html>
