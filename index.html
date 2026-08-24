@@ -172,4 +172,117 @@
                 let isBooked = bookedSlots.includes(timeString);
 
                 let btn = document.createElement('button');
-                btn.type =
+                btn.type = 'button';
+                
+                if (isBooked) {
+                    btn.className = "bg-brand-muted text-brand-textMuted cursor-not-allowed border border-transparent text-xs py-2.5 rounded-lg font-mono";
+                    btn.innerText = timeString;
+                    btn.disabled = true;
+                } else {
+                    btn.className = "slot-btn bg-zinc-900 border border-brand-green/40 hover:border-brand-green text-zinc-200 text-xs py-2.5 rounded-lg font-mono transition";
+                    btn.innerText = timeString;
+                    btn.onclick = () => selectSlot(timeString, btn);
+                }
+
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectSlot(time, element) {
+            document.querySelectorAll('.slot-btn').forEach(el => {
+                el.classList.remove('bg-brand-green', 'text-black', 'font-bold');
+                el.classList.add('bg-zinc-900', 'text-zinc-200');
+            });
+
+            element.classList.remove('bg-zinc-900', 'text-zinc-200');
+            element.classList.add('bg-brand-green', 'text-black', 'font-bold');
+
+            selectedSlot = time;
+            document.getElementById('selectedTimeText').innerText = `${time} WIB`;
+            document.getElementById('actionBar').classList.remove('hidden');
+        }
+
+        function openModal() {
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        // Simpan Data Booking & Panggil QRIS DOKU via Edge Function
+        async function handleBookingSubmit(e) {
+            e.preventDefault();
+
+            const payBtn = document.getElementById('payBtn');
+            payBtn.innerText = "Membuat QRIS DOKU...";
+            payBtn.disabled = true;
+
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const date = document.getElementById('bookingDate').value;
+
+            // 1. Simpan booking ke Supabase terlebih dahulu
+            const { data, error } = await supabaseClient
+                .from('bookings')
+                .insert([
+                    {
+                        booking_date: date,
+                        time_slot: selectedSlot,
+                        customer_name: name,
+                        customer_phone: phone,
+                        status: 'pending'
+                    }
+                ])
+                .select();
+
+            if (error) {
+                alert('Gagal membuat booking: ' + error.message);
+                payBtn.innerText = "Bayar via QRIS (DOKU)";
+                payBtn.disabled = false;
+                return;
+            }
+
+            const bookingId = data[0].id;
+
+            // 2. Panggil Supabase Edge Function untuk Generate QRIS DOKU
+            try {
+                const response = await fetch('https://yofdfbqogzenvzwyqwcq.supabase.co/functions/v1/doku-qris', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({
+                        amount: FIX_PRICE,
+                        bookingId: bookingId,
+                        customerName: name
+                    })
+                });
+
+                const dokuData = await response.json();
+
+                // 3. Tampilkan QRIS dari DOKU
+                if (dokuData && dokuData.qris_data) {
+                    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(dokuData.qris_data.qr_content)}`;
+                } else {
+                    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MEMOTISM_BOOKING_${bookingId}`;
+                }
+
+                document.getElementById('bookingForm').classList.add('hidden');
+                document.getElementById('qrisContainer').classList.remove('hidden');
+
+                fetchBookedSlots();
+
+            } catch (err) {
+                console.error('Error QRIS:', err);
+                alert('Terjadi kesalahan saat membuat QRIS DOKU.');
+                payBtn.innerText = "Bayar via QRIS (DOKU)";
+                payBtn.disabled = false;
+            }
+        }
+
+        fetchBookedSlots();
+    </script>
+</body>
+</html>
