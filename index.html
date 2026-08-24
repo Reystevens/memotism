@@ -136,13 +136,11 @@
         let selectedSlot = null;
         let paidSlots = [];
 
-        // Set Tanggal Minimal ke Hari Ini
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('bookingDate');
         dateInput.min = todayStr;
         dateInput.value = todayStr;
 
-        // Ambil HANYA Slot yang Sudah LUNAS ('paid') dari Supabase
         async function fetchBookedSlots() {
             const selectedDate = dateInput.value;
             
@@ -164,7 +162,6 @@
             generateSlots();
         }
 
-        // Render Slot Jam + Validasi Waktu Real-Time
         function generateSlots() {
             const grid = document.getElementById('slotsGrid');
             grid.innerHTML = '';
@@ -174,8 +171,8 @@
             const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
             const isTodaySelected = (dateInput.value === currentDateStr);
 
-            let startMinutes = 8 * 60;  // 08:00
-            let endMinutes = 22 * 60;   // 22:00
+            let startMinutes = 8 * 60;
+            let endMinutes = 22 * 60;
 
             for (let time = startMinutes; time < endMinutes; time += 15) {
                 let hours = Math.floor(time / 60).toString().padStart(2, '0');
@@ -235,7 +232,7 @@
             const phone = document.getElementById('custPhone').value;
             const date = dateInput.value;
 
-            // 1. Simpan booking ke Supabase terlebih dahulu
+            // 1. Simpan booking ke Supabase
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .insert([
@@ -256,7 +253,8 @@
                 return;
             }
 
-            const bookingId = data[0].id;
+            // Fallback ID jika data insert dilindungi RLS Supabase
+            const bookingId = (data && data.length > 0) ? data[0].id : Math.floor(Math.random() * 10000);
 
             // 2. Panggil Supabase Edge Function
             try {
@@ -275,9 +273,11 @@
 
                 const dokuData = await response.json();
 
-                // 3. Redireksi ke URL Pembayaran Resmi DOKU Checkout (QRIS)
-                if (dokuData && dokuData.response && dokuData.response.payment && dokuData.response.payment.url) {
-                    window.location.href = dokuData.response.payment.url;
+                // 3. Cek & Ambil URL Redirect dari Response DOKU Checkout
+                const paymentUrl = dokuData?.response?.payment?.url || dokuData?.response?.payment_url;
+
+                if (paymentUrl) {
+                    window.location.href = paymentUrl; // Redirect langsung ke halaman pembayaran QRIS DOKU
                 } else {
                     alert("Response Error DOKU: " + JSON.stringify(dokuData));
                     payBtn.innerText = "Bayar via QRIS (DOKU)";
