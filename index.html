@@ -144,7 +144,7 @@
         let selectedSlot = null;
         let paidSlots = [];
 
-        // Set Tanggal Minimal ke Hari Ini (Mencegah Pilih Tanggal Kemarin)
+        // Set Tanggal Minimal ke Hari Ini
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('bookingDate');
         dateInput.min = todayStr;
@@ -158,7 +158,7 @@
                 .from('bookings')
                 .select('time_slot')
                 .eq('booking_date', selectedDate)
-                .eq('status', 'paid'); // HANYA Mengunci jika status sudah Lunas (Paid)
+                .eq('status', 'paid');
 
             if (error) {
                 console.error('Error fetching slots:', error);
@@ -191,7 +191,6 @@
                 let timeString = `${hours}:${mins}`;
 
                 let isPaid = paidSlots.includes(timeString);
-                // Matikan slot jika sudah terlewat di hari yang sama
                 let isPassed = isTodaySelected && (time <= currentMinutesNow);
 
                 let btn = document.createElement('button');
@@ -244,7 +243,7 @@
             const phone = document.getElementById('custPhone').value;
             const date = dateInput.value;
 
-            // Simpan status awal sebagai 'pending' (Slot Belum Terkunci Sebelum Dibayar)
+            // Simpan status awal sebagai 'pending'
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .insert([
@@ -283,10 +282,17 @@
 
                 const dokuData = await response.json();
 
-                if (dokuData && dokuData.qris_data) {
-                    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(dokuData.qris_data.qr_content)}`;
+                // PERBAIKAN BACA PROPERTI DOKU QRIS (Mendukung SNAP/Direct Response)
+                let qrString = dokuData?.qrContent || dokuData?.qris_data?.qr_content || dokuData?.qrString;
+
+                if (qrString) {
+                    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrString)}`;
                 } else {
-                    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MEMOTISM_BOOKING_${bookingId}`;
+                    // Tampilkan pesan error jika API DOKU menolak request
+                    alert("Error Response DOKU: " + JSON.stringify(dokuData));
+                    payBtn.innerText = "Bayar via QRIS (DOKU)";
+                    payBtn.disabled = false;
+                    return;
                 }
 
                 document.getElementById('bookingForm').classList.add('hidden');
@@ -300,9 +306,7 @@
             }
         }
 
-        // Auto-update jam setiap 1 menit agar selalu sync real-time
         setInterval(generateSlots, 60000);
-
         fetchBookedSlots();
     </script>
 </body>
