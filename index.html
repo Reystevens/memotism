@@ -184,12 +184,13 @@
 
             <form id="bookingForm" onsubmit="handleBookingSubmit(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">Nama Lengkap</label>
+                    <label class="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
                     <input type="text" id="custName" required placeholder="John Doe" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl p-3 text-sm text-zinc-900 dark:text-white focus:border-brand-green outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">Nomor WhatsApp</label>
-                    <input type="tel" id="custPhone" required placeholder="08123456789" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl p-3 text-sm text-zinc-900 dark:text-white focus:border-brand-green outline-none">
+                    <label class="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">Nomor WhatsApp <span class="text-red-500">*</span></label>
+                    <input type="tel" id="custPhone" required pattern="[0-9]{9,14}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="08123456789" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl p-3 text-sm text-zinc-900 dark:text-white focus:border-brand-green outline-none">
+                    <p class="text-[10px] text-zinc-500 mt-1">Hanya angka (minimal 9 digit).</p>
                 </div>
 
                 <div class="border-t border-b border-zinc-200 dark:border-zinc-800 py-3 my-2 space-y-1">
@@ -367,13 +368,27 @@
         async function handleBookingSubmit(e) {
             e.preventDefault();
 
+            const nameInput = document.getElementById('custName');
+            const phoneInput = document.getElementById('custPhone');
+
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const date = dateInput.value;
+
+            // Validasi Ketat Nama & Telepon
+            if (!name || !phone) {
+                alert('Nama dan Nomor WhatsApp wajib diisi!');
+                return;
+            }
+
+            if (!/^[0-9]{9,14}$/.test(phone)) {
+                alert('Nomor WhatsApp harus berisi 9-14 digit angka tanpa huruf atau simbol!');
+                return;
+            }
+
             const payBtn = document.getElementById('payBtn');
             payBtn.innerText = "Mengarahkan ke DOKU...";
             payBtn.disabled = true;
-
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const date = dateInput.value;
 
             // Memasukkan spot ke kolom tersendiri 'spot'
             const { data, error } = await supabaseClient
