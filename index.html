@@ -46,24 +46,24 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4">
         
-        <!-- Filter Tanggal -->
+        <!-- Filter Tanggal & Keterangan -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-brand-card p-4 rounded-xl border border-zinc-800">
             <div>
                 <label class="block text-xs font-medium text-brand-textMuted mb-1">PILIH TANGGAL</label>
                 <input type="date" id="bookingDate" onchange="fetchBookedSlots()" class="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg p-2.5 focus:ring-brand-green focus:border-brand-green outline-none">
             </div>
-            <div class="flex items-center gap-4 text-xs">
+            <div class="flex flex-wrap items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-zinc-900 border border-brand-green"></span>
                     <span class="text-zinc-300">Tersedia</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-brand-green"></span>
-                    <span class="text-zinc-300">Dipilih</span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-600"></span>
+                    <span class="text-zinc-300">On Hold (3 Mnt)</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-brand-muted"></span>
-                    <span class="text-brand-textMuted">Tidak Tersedia / Booked</span>
+                    <span class="text-brand-textMuted">Booked / Lewat</span>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
             <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-textMuted hover:text-white">✕</button>
             
             <h3 class="text-xl font-bold text-white mb-1">Konfirmasi Booking</h3>
-            <p class="text-xs text-brand-textMuted mb-6">Isi data diri untuk mendapatkan QRIS DOKU</p>
+            <p class="text-xs text-brand-textMuted mb-6">Batas waktu pembayaran DOKU: 3 Menit</p>
 
             <form id="bookingForm" onsubmit="handleBookingSubmit(event)" class="space-y-4">
                 <div>
@@ -125,16 +125,18 @@
         </div>
     </div>
 
-    <!-- JavaScript Integrasi DOKU Checkout -->
+    <!-- JavaScript Integrasi DOKU Checkout & On Hold -->
     <script>
         const SUPABASE_URL = 'https://yofdfbqogzenvzwyqwcq.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_5t-m112GtGpHw7rWMZm1-Q_56iBpT--';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const FIX_PRICE = 1000;
+        const HOLD_MINUTES = 3; // Batas waktu slot dikunci
 
         let selectedSlot = null;
         let paidSlots = [];
+        let onHoldSlots = [];
 
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('bookingDate');
@@ -144,17 +146,32 @@
         async function fetchBookedSlots() {
             const selectedDate = dateInput.value;
             
+            // Tarik data paid dan pending (beserta waktu dibuatnya)
             const { data, error } = await supabaseClient
                 .from('bookings')
-                .select('time_slot')
+                .select('time_slot, status, created_at')
                 .eq('booking_date', selectedDate)
-                .eq('status', 'paid');
+                .in('status', ['paid', 'pending']);
+
+            paidSlots = [];
+            onHoldSlots = [];
 
             if (error) {
                 console.error('Error fetching slots:', error);
-                paidSlots = [];
-            } else {
-                paidSlots = data.map(item => item.time_slot);
+            } else if (data) {
+                const now = new Date();
+                data.forEach(item => {
+                    if (item.status === 'paid') {
+                        paidSlots.push(item.time_slot);
+                    } else if (item.status === 'pending' && item.created_at) {
+                        // Cek apakah umur pending masih di bawah 3 menit
+                        const bookingTime = new Date(item.created_at);
+                        const diffMinutes = (now - bookingTime) / (1000 * 60);
+                        if (diffMinutes <= HOLD_MINUTES) {
+                            onHoldSlots.push(item.time_slot);
+                        }
+                    }
+                });
             }
 
             selectedSlot = null;
@@ -180,18 +197,24 @@
                 let timeString = `${hours}:${mins}`;
 
                 let isPaid = paidSlots.includes(timeString);
+                let isOnHold = onHoldSlots.includes(timeString);
                 let isPassed = isTodaySelected && (time <= currentMinutesNow);
 
                 let btn = document.createElement('button');
                 btn.type = 'button';
                 
                 if (isPaid || isPassed) {
-                    btn.className = "bg-brand-muted text-brand-textMuted cursor-not-allowed border border-transparent text-xs py-2.5 rounded-lg font-mono opacity-50";
-                    btn.innerText = timeString;
+                    btn.className = "bg-brand-muted text-brand-textMuted cursor-not-allowed border border-transparent text-xs py-2.5 rounded-lg font-mono opacity-50 flex flex-col items-center justify-center gap-0.5";
+                    btn.innerHTML = `<span>${timeString}</span>`;
+                    btn.disabled = true;
+                } else if (isOnHold) {
+                    // Tampilan Kuning Khusus On Hold
+                    btn.className = "bg-yellow-900/30 text-yellow-500 cursor-not-allowed border border-yellow-700/50 text-xs py-2 rounded-lg font-mono opacity-90 flex flex-col items-center justify-center gap-0.5";
+                    btn.innerHTML = `<span>${timeString}</span><span class="text-[9px] font-sans">On Hold</span>`;
                     btn.disabled = true;
                 } else {
-                    btn.className = "slot-btn bg-zinc-900 border border-brand-green/40 hover:border-brand-green text-zinc-200 text-xs py-2.5 rounded-lg font-mono transition";
-                    btn.innerText = timeString;
+                    btn.className = "slot-btn bg-zinc-900 border border-brand-green/40 hover:border-brand-green text-zinc-200 text-xs py-2.5 rounded-lg font-mono transition flex flex-col items-center justify-center";
+                    btn.innerHTML = `<span>${timeString}</span>`;
                     btn.onclick = () => selectSlot(timeString, btn);
                 }
 
@@ -232,7 +255,7 @@
             const phone = document.getElementById('custPhone').value;
             const date = dateInput.value;
 
-            // 1. Simpan booking ke Supabase
+            // 1. Simpan booking ke Supabase dengan status pending
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .insert([
@@ -253,7 +276,6 @@
                 return;
             }
 
-            // Fallback ID jika data insert dilindungi RLS Supabase
             const bookingId = (data && data.length > 0) ? data[0].id : Math.floor(Math.random() * 10000);
 
             // 2. Panggil Supabase Edge Function
@@ -272,18 +294,15 @@
                 });
 
                 const dokuData = await response.json();
-
-                // 3. Cek & Ambil URL Redirect dari Response DOKU Checkout
                 const paymentUrl = dokuData?.response?.payment?.url || dokuData?.response?.payment_url;
 
                 if (paymentUrl) {
-                    window.location.href = paymentUrl; // Redirect langsung ke halaman pembayaran QRIS DOKU
+                    window.location.href = paymentUrl; 
                 } else {
                     alert("Response Error DOKU: " + JSON.stringify(dokuData));
                     payBtn.innerText = "Bayar via QRIS (DOKU)";
                     payBtn.disabled = false;
                 }
-
             } catch (err) {
                 console.error('Error Pembayaran:', err);
                 alert('Terjadi kesalahan koneksi saat membuat pembayaran.');
@@ -292,7 +311,10 @@
             }
         }
 
-        setInterval(generateSlots, 60000);
+        // Live Auto-Refresh Data (Setiap 20 detik agar perubahan On Hold cepat terlihat)
+        setInterval(fetchBookedSlots, 20000);
+        
+        // Panggil pertama kali
         fetchBookedSlots();
     </script>
 </body>
