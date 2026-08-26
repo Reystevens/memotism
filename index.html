@@ -267,11 +267,15 @@
         async function fetchBookedSlots() {
             const selectedDate = dateInput.value;
             
+            // Ambil kata kunci unik spot (contoh: "SPOT 1")
+            const spotKeyword = currentSpot.split(' - ')[0]; 
+
+            // Tarik data dengan ilike agar mendeteksi format nama customer_name yang memiliki keterangan spot
             const { data, error } = await supabaseClient
                 .from('bookings')
-                .select('time_slot, status, created_at')
+                .select('time_slot, status, created_at, customer_name')
                 .eq('booking_date', selectedDate)
-                .eq('customer_name', currentSpot) 
+                .ilike('customer_name', `%${spotKeyword}%`) 
                 .in('status', ['paid', 'pending']);
 
             paidSlots = [];
