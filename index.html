@@ -17,13 +17,10 @@
                         brand: {
                             black: '#09090b',
                             cardDark: '#18181b',
-                            cardLight: '#ffffff',
                             green: '#22c55e',
                             greenHover: '#16a34a',
                             mutedDark: '#27272a',
-                            mutedLight: '#f4f4f5',
-                            textMutedDark: '#71717a',
-                            textMutedLight: '#737373'
+                            textMutedDark: '#71717a'
                         }
                     }
                 }
@@ -39,7 +36,7 @@
             <div class="flex items-center gap-3">
                 <img src="logo.png" alt="MEMOTISM Logo" class="h-10 w-auto dark:invert dark:brightness-200">
             </div>
-            <div class="flex items-center gap-3">
+            <div>
                 <!-- Tombol Light / Dark Mode -->
                 <button onclick="toggleTheme()" class="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:scale-105 transition">
                     <span id="themeIcon">☀️</span>
@@ -50,7 +47,6 @@
 
     <!-- ================= VIEW 1: KATALOG SPOT FOTO (HOME) ================= -->
     <div id="homeView" class="max-w-4xl mx-auto px-4 space-y-8">
-        <!-- Tagline -->
         <div class="text-center py-4">
             <p class="text-xs sm:text-sm uppercase tracking-widest text-zinc-600 dark:text-zinc-400 font-medium">
                 Every memory must be created, captured, and cherished
@@ -59,7 +55,6 @@
 
         <!-- Daftar 3 Spot Foto -->
         <div class="space-y-6">
-            
             <!-- SPOT 1 -->
             <div onclick="selectSpot('SPOT 1', 'Conceptual Artist Photobox')" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
                 <div class="mb-4">
@@ -67,7 +62,7 @@
                     <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Conceptual Artist Photobox</p>
                 </div>
                 <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                    <img src="SPOT 1.jpg" alt="Spot 1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <img src="spot1.jpg" alt="Spot 1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                 </div>
             </div>
 
@@ -77,9 +72,8 @@
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">SPOT 2</h2>
                     <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Basic & Essential Photobox</p>
                 </div>
-                <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center">
-                    <!-- Placeholder gambar spot 2 jika belum ada filenya, bisa diganti src="spot2.jpg" -->
-                    <div class="text-zinc-400 text-sm font-mono">Spot 2 Preview</div>
+                <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                    <img src="spot2.jpg" alt="Spot 2" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                 </div>
             </div>
 
@@ -89,24 +83,23 @@
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">SPOT 3</h2>
                     <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Wide Self-Photo Studio</p>
                 </div>
-                <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center">
-                    <!-- Placeholder gambar spot 3 jika belum ada filenya, bisa diganti src="spot3.jpg" -->
-                    <div class="text-zinc-400 text-sm font-mono">Spot 3 Preview</div>
+                <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                    <img src="spot3.jpg" alt="Spot 3" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                 </div>
             </div>
-
         </div>
 
-        <!-- Footer Home -->
+        <!-- Footer Home (Menggunakan logobawah.png dan Link IG) -->
         <footer class="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center space-y-4">
-            <img src="logo.png" alt="MEMOTISM Logo" class="h-8 w-auto mx-auto dark:invert dark:brightness-200 opacity-80">
-            <p class="text-xs text-zinc-500 font-serif italic">CONCEPTUAL PHOTOBOX</p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-zinc-600 dark:text-zinc-400 pt-2">
+            <img src="logobawah.png" alt="MEMOTISM Logo" class="h-10 w-auto mx-auto dark:invert dark:brightness-200 opacity-90">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 text-xs text-zinc-600 dark:text-zinc-400 pt-2">
                 <div class="flex items-center gap-2">
                     <span>📍 Jl. Raya klampis xx. xxx</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span>📸 memotism.id</span>
+                    <a href="https://www.instagram.com/memotism.id/" target="_blank" class="hover:text-brand-green transition flex items-center gap-1.5 font-medium">
+                        📸 memotism.id
+                    </a>
                 </div>
             </div>
         </footer>
@@ -120,7 +113,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-100 dark:bg-brand-cardDark p-4 rounded-2xl border border-zinc-300 dark:border-zinc-800">
             <div>
                 <button onclick="backToHome()" class="inline-flex items-center gap-2 text-xs font-semibold text-brand-green hover:underline mb-1">
-                    ← Kembali ke Pilih Spot
+                    ← Kembali ke Halaman Utama
                 </button>
                 <h2 id="activeSpotTitle" class="text-lg font-bold text-zinc-900 dark:text-white">-</h2>
             </div>
@@ -154,20 +147,23 @@
             </div>
         </section>
 
-        <!-- Footer Booking -->
+        <!-- Footer Booking (Menggunakan logobawah.png dan Link IG) -->
         <footer class="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center space-y-3">
+            <img src="logobawah.png" alt="MEMOTISM Logo" class="h-8 w-auto mx-auto dark:invert dark:brightness-200 opacity-90 mb-2">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6 text-xs text-zinc-600 dark:text-zinc-400">
                 <div class="flex items-center gap-2">
                     <span>📍 Jl. Raya klampis xx. xxx</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span>📸 memotism.id</span>
+                    <a href="https://www.instagram.com/memotism.id/" target="_blank" class="hover:text-brand-green transition flex items-center gap-1.5 font-medium">
+                        📸 memotism.id
+                    </a>
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- Sticky Bottom Bar untuk Lanjut Bayar -->
+    <!-- Sticky Bottom Bar -->
     <div id="actionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-brand-green/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between hidden z-30 transition-colors duration-300">
         <div>
             <p class="text-xs text-zinc-500 dark:text-brand-textMutedDark">Sesi Terpilih:</p>
@@ -179,7 +175,7 @@
     </div>
 
     <!-- Modal Form & Pembayaran -->
-    <div id="checkoutModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+    <div id="checkoutModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white dark:bg-brand-cardDark border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 w-full max-w-md relative transition-colors duration-300">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 dark:hover:text-white">✕</button>
             
@@ -264,7 +260,6 @@
             selectedSlot = null;
         }
 
-        // Ambil Data Slot dari Supabase berdasarkan Tanggal & Spot
         async function fetchBookedSlots() {
             const selectedDate = dateInput.value;
             
@@ -272,7 +267,6 @@
                 .from('bookings')
                 .select('time_slot, status, created_at')
                 .eq('booking_date', selectedDate)
-                // Filter berdasarkan spot agar slot antar spot tidak saling tabrakan
                 .eq('customer_name', currentSpot) 
                 .in('status', ['paid', 'pending']);
 
@@ -284,8 +278,6 @@
             } else if (data) {
                 const now = new Date();
                 data.forEach(item => {
-                    // Catatan: Jika ingin global per tanggal, hapus filter customer_name di atas.
-                    // Saat ini diset spesifik per spot.
                     if (item.status === 'paid') {
                         paidSlots.push(item.time_slot);
                     } else if (item.status === 'pending' && item.created_at) {
@@ -332,7 +324,7 @@
                     btn.innerText = timeString;
                     btn.disabled = true;
                 } else if (isOnHold) {
-                    // Warna On Hold khusus tanpa teks tambahan
+                    // Warna On Hold khusus TANPA teks tambahan di bawahnya
                     btn.className = "bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 cursor-not-allowed border border-yellow-600/40 text-xs py-2.5 rounded-lg font-mono opacity-90 flex items-center justify-center font-bold";
                     btn.innerText = timeString;
                     btn.disabled = true;
@@ -379,7 +371,6 @@
             const phone = document.getElementById('custPhone').value;
             const date = dateInput.value;
 
-            // Simpan nama customer digabung dengan info spot agar unik per spot
             const fullCustomerName = `${name} (${currentSpot})`;
 
             const { data, error } = await supabaseClient
