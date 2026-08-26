@@ -219,8 +219,9 @@
         const FIX_PRICE = 1000;
         const HOLD_MINUTES = 3;
 
-        let currentSpot = '';
-        let slotIntervalMinutes = 15; // Default
+        let currentSpotId = ''; // Menyimpan "SPOT 1", "SPOT 2", atau "SPOT 3"
+        let currentSpotTitle = '';
+        let slotIntervalMinutes = 15;
         let selectedSlot = null;
         let paidSlots = [];
         let onHoldSlots = [];
@@ -230,7 +231,6 @@
         dateInput.min = todayStr;
         dateInput.value = todayStr;
 
-        // Fungsi Toggle Light / Dark Mode
         function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -243,13 +243,13 @@
             }
         }
 
-        // Navigasi Antar Halaman dengan Interval Menit Dinamis (10 atau 15 menit)
-        function selectSpot(spotNumber, spotName, intervalMins) {
-            currentSpot = `${spotNumber} - ${spotName}`;
+        function selectSpot(spotNum, spotName, intervalMins) {
+            currentSpotId = spotNum; // "SPOT 1", "SPOT 2", atau "SPOT 3"
+            currentSpotTitle = `${spotNum} - ${spotName}`;
             slotIntervalMinutes = intervalMins;
 
-            document.getElementById('activeSpotTitle').innerText = currentSpot;
-            document.getElementById('modalSpotInfo').innerText = currentSpot;
+            document.getElementById('activeSpotTitle').innerText = currentSpotTitle;
+            document.getElementById('modalSpotInfo').innerText = currentSpotTitle;
             document.getElementById('slotHeaderInfo').innerText = `Pilih Sesi Jam (${slotIntervalMinutes} Menit)`;
 
             document.getElementById('homeView').classList.add('hidden');
@@ -267,15 +267,12 @@
         async function fetchBookedSlots() {
             const selectedDate = dateInput.value;
             
-            // Ambil kata kunci unik spot (contoh: "SPOT 1")
-            const spotKeyword = currentSpot.split(' - ')[0]; 
-
-            // Tarik data dengan ilike agar mendeteksi format nama customer_name yang memiliki keterangan spot
+            // Mengambil data presisi dari kolom 'spot'
             const { data, error } = await supabaseClient
                 .from('bookings')
-                .select('time_slot, status, created_at, customer_name')
+                .select('time_slot, status, created_at, spot')
                 .eq('booking_date', selectedDate)
-                .ilike('customer_name', `%${spotKeyword}%`) 
+                .eq('spot', currentSpotId) 
                 .in('status', ['paid', 'pending']);
 
             paidSlots = [];
@@ -312,7 +309,6 @@
             const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
             const isTodaySelected = (dateInput.value === currentDateStr);
 
-            // Jam buka 08.00 hingga 22.00
             let startMinutes = 8 * 60;
             let endMinutes = 22 * 60;
 
@@ -379,16 +375,16 @@
             const phone = document.getElementById('custPhone').value;
             const date = dateInput.value;
 
-            const fullCustomerName = `${name} (${currentSpot})`;
-
+            // Memasukkan spot ke kolom tersendiri 'spot'
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .insert([
                     {
                         booking_date: date,
                         time_slot: selectedSlot,
-                        customer_name: fullCustomerName,
+                        customer_name: name,
                         customer_phone: phone,
+                        spot: currentSpotId, // Mengisi 'SPOT 1', 'SPOT 2', atau 'SPOT 3'
                         status: 'pending'
                     }
                 ])
