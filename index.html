@@ -136,7 +136,7 @@
         <!-- Filter Tanggal -->
         <div class="bg-zinc-100 dark:bg-brand-cardDark p-4 rounded-xl border border-zinc-300 dark:border-zinc-800">
             <label class="block text-xs font-medium text-zinc-500 dark:text-brand-textMutedDark mb-1 uppercase tracking-wider">Pilih Tanggal</label>
-            <input type="date" id="bookingDate" onchange="fetchBookedSlots()" class="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-sm rounded-lg p-2.5 focus:ring-brand-green focus:border-brand-green outline-none">
+            <input type="date" id="bookingDate" onchange="fetchBookedSlots(true)" class="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-sm rounded-lg p-2.5 focus:ring-brand-green focus:border-brand-green outline-none">
         </div>
 
         <!-- Grid Slot Waktu -->
@@ -220,7 +220,7 @@
         const FIX_PRICE = 1000;
         const HOLD_MINUTES = 3;
 
-        let currentSpotId = ''; // Menyimpan "SPOT 1", "SPOT 2", atau "SPOT 3"
+        let currentSpotId = ''; 
         let currentSpotTitle = '';
         let slotIntervalMinutes = 15;
         let selectedSlot = null;
@@ -245,7 +245,7 @@
         }
 
         function selectSpot(spotNum, spotName, intervalMins) {
-            currentSpotId = spotNum; // "SPOT 1", "SPOT 2", atau "SPOT 3"
+            currentSpotId = spotNum;
             currentSpotTitle = `${spotNum} - ${spotName}`;
             slotIntervalMinutes = intervalMins;
 
@@ -255,7 +255,7 @@
 
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('bookingView').classList.remove('hidden');
-            fetchBookedSlots();
+            fetchBookedSlots(true);
         }
 
         function backToHome() {
@@ -265,10 +265,9 @@
             selectedSlot = null;
         }
 
-        async function fetchBookedSlots() {
+        async function fetchBookedSlots(resetSelection = false) {
             const selectedDate = dateInput.value;
             
-            // Mengambil data presisi dari kolom 'spot'
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .select('time_slot, status, created_at, spot')
@@ -296,8 +295,11 @@
                 });
             }
 
-            selectedSlot = null;
-            document.getElementById('actionBar').classList.add('hidden');
+            if (resetSelection) {
+                selectedSlot = null;
+                document.getElementById('actionBar').classList.add('hidden');
+            }
+
             generateSlots();
         }
 
@@ -321,6 +323,7 @@
                 let isPaid = paidSlots.includes(timeString);
                 let isOnHold = onHoldSlots.includes(timeString);
                 let isPassed = isTodaySelected && (time <= currentMinutesNow);
+                let isSelected = (selectedSlot === timeString);
 
                 let btn = document.createElement('button');
                 btn.type = 'button';
@@ -333,6 +336,10 @@
                     btn.className = "bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 cursor-not-allowed border border-yellow-600/40 text-xs py-2.5 rounded-lg font-mono opacity-90 flex items-center justify-center font-bold";
                     btn.innerText = timeString;
                     btn.disabled = true;
+                } else if (isSelected) {
+                    btn.className = "slot-btn bg-brand-green text-black font-bold border-brand-green text-xs py-2.5 rounded-lg font-mono transition flex items-center justify-center shadow-sm";
+                    btn.innerText = timeString;
+                    btn.onclick = () => selectSlot(timeString, btn);
                 } else {
                     btn.className = "slot-btn bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-brand-green/40 hover:border-brand-green text-zinc-800 dark:text-zinc-200 text-xs py-2.5 rounded-lg font-mono transition flex items-center justify-center shadow-sm";
                     btn.innerText = timeString;
@@ -358,6 +365,10 @@
         }
 
         function openModal() {
+            if (!selectedSlot) {
+                alert('Silakan pilih jam sesi foto terlebih dahulu!');
+                return;
+            }
             document.getElementById('checkoutModal').classList.remove('hidden');
         }
 
@@ -368,6 +379,12 @@
         async function handleBookingSubmit(e) {
             e.preventDefault();
 
+            if (!selectedSlot) {
+                alert('Sesi jam belum dipilih atau telah kedaluwarsa. Silakan pilih kembali jam sesi foto.');
+                closeModal();
+                return;
+            }
+
             const nameInput = document.getElementById('custName');
             const phoneInput = document.getElementById('custPhone');
 
@@ -375,7 +392,6 @@
             const phone = phoneInput.value.trim();
             const date = dateInput.value;
 
-            // Validasi Ketat Nama & Telepon
             if (!name || !phone) {
                 alert('Nama dan Nomor WhatsApp wajib diisi!');
                 return;
@@ -390,7 +406,6 @@
             payBtn.innerText = "Mengarahkan ke DOKU...";
             payBtn.disabled = true;
 
-            // Memasukkan spot ke kolom tersendiri 'spot'
             const { data, error } = await supabaseClient
                 .from('bookings')
                 .insert([
@@ -399,7 +414,7 @@
                         time_slot: selectedSlot,
                         customer_name: name,
                         customer_phone: phone,
-                        spot: currentSpotId, // Mengisi 'SPOT 1', 'SPOT 2', atau 'SPOT 3'
+                        spot: currentSpotId,
                         status: 'pending'
                     }
                 ])
@@ -446,7 +461,8 @@
             }
         }
 
-        setInterval(fetchBookedSlots, 20000);
+        // Auto Refresh Tanpa Mengosongkan Jam Terpilih Pelanggan
+        setInterval(() => fetchBookedSlots(false), 20000);
     </script>
 </body>
 </html>
