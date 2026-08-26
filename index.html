@@ -56,10 +56,10 @@
         <!-- Daftar 3 Spot Foto -->
         <div class="space-y-6">
             <!-- SPOT 1 -->
-            <div onclick="selectSpot('SPOT 1', 'Conceptual Artist Photobox')" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
+            <div onclick="selectSpot('SPOT 1', 'Conceptual Artist Photobox', 10)" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
                 <div class="mb-4">
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">SPOT 1</h2>
-                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Conceptual Artist Photobox</p>
+                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Conceptual Artist Photobox (Durasi 10 Menit)</p>
                 </div>
                 <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                     <img src="spot1.jpg" alt="Spot 1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -67,10 +67,10 @@
             </div>
 
             <!-- SPOT 2 -->
-            <div onclick="selectSpot('SPOT 2', 'Basic & Essential Photobox')" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
+            <div onclick="selectSpot('SPOT 2', 'Basic & Essential Photobox', 10)" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
                 <div class="mb-4">
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">SPOT 2</h2>
-                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Basic & Essential Photobox</p>
+                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Basic & Essential Photobox (Durasi 10 Menit)</p>
                 </div>
                 <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                     <img src="spot2.jpg" alt="Spot 2" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -78,10 +78,10 @@
             </div>
 
             <!-- SPOT 3 -->
-            <div onclick="selectSpot('SPOT 3', 'Wide Self-Photo Studio')" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
+            <div onclick="selectSpot('SPOT 3', 'Wide Self-Photo Studio', 15)" class="group cursor-pointer bg-zinc-100 dark:bg-brand-cardDark border border-zinc-300 dark:border-zinc-800 hover:border-brand-green dark:hover:border-brand-green rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md">
                 <div class="mb-4">
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">SPOT 3</h2>
-                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Wide Self-Photo Studio</p>
+                    <p class="text-sm text-zinc-600 dark:text-brand-textMutedDark">Wide Self-Photo Studio (Durasi 15 Menit)</p>
                 </div>
                 <div class="overflow-hidden rounded-2xl aspect-[16/10] bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                     <img src="spot3.jpg" alt="Spot 3" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <!-- Footer Home (Menggunakan logobawah.png dan Link IG) -->
+        <!-- Footer Home -->
         <footer class="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center space-y-4">
             <img src="logobawah.png" alt="MEMOTISM Logo" class="h-10 w-auto mx-auto dark:invert dark:brightness-200 opacity-90">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6 text-xs text-zinc-600 dark:text-zinc-400 pt-2">
@@ -141,13 +141,13 @@
 
         <!-- Grid Slot Waktu -->
         <section>
-            <h3 class="text-xs font-semibold tracking-wider text-zinc-500 dark:text-brand-textMutedDark mb-3 uppercase">Pilih Sesi Jam (15 Menit)</h3>
+            <h3 id="slotHeaderInfo" class="text-xs font-semibold tracking-wider text-zinc-500 dark:text-brand-textMutedDark mb-3 uppercase">Pilih Sesi Jam</h3>
             <div id="slotsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
                 <!-- Slot jam di-generate via JS -->
             </div>
         </section>
 
-        <!-- Footer Booking (Menggunakan logobawah.png dan Link IG) -->
+        <!-- Footer Booking -->
         <footer class="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center space-y-3">
             <img src="logobawah.png" alt="MEMOTISM Logo" class="h-8 w-auto mx-auto dark:invert dark:brightness-200 opacity-90 mb-2">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6 text-xs text-zinc-600 dark:text-zinc-400">
@@ -194,8 +194,8 @@
 
                 <div class="border-t border-b border-zinc-200 dark:border-zinc-800 py-3 my-2 space-y-1">
                     <div class="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                        <span>Durasi Sesi</span>
-                        <span>15 Menit</span>
+                        <span>Jam Operasional</span>
+                        <span>08.00 - 22.00</span>
                     </div>
                     <div class="flex justify-between text-sm font-semibold text-zinc-900 dark:text-white">
                         <span>Total Bayar</span>
@@ -220,6 +220,7 @@
         const HOLD_MINUTES = 3;
 
         let currentSpot = '';
+        let slotIntervalMinutes = 15; // Default
         let selectedSlot = null;
         let paidSlots = [];
         let onHoldSlots = [];
@@ -242,11 +243,14 @@
             }
         }
 
-        // Navigasi Antar Halaman
-        function selectSpot(spotNumber, spotName) {
+        // Navigasi Antar Halaman dengan Interval Menit Dinamis (10 atau 15 menit)
+        function selectSpot(spotNumber, spotName, intervalMins) {
             currentSpot = `${spotNumber} - ${spotName}`;
+            slotIntervalMinutes = intervalMins;
+
             document.getElementById('activeSpotTitle').innerText = currentSpot;
             document.getElementById('modalSpotInfo').innerText = currentSpot;
+            document.getElementById('slotHeaderInfo').innerText = `Pilih Sesi Jam (${slotIntervalMinutes} Menit)`;
 
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('bookingView').classList.remove('hidden');
@@ -304,10 +308,11 @@
             const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
             const isTodaySelected = (dateInput.value === currentDateStr);
 
+            // Jam buka 08.00 hingga 22.00
             let startMinutes = 8 * 60;
             let endMinutes = 22 * 60;
 
-            for (let time = startMinutes; time < endMinutes; time += 15) {
+            for (let time = startMinutes; time < endMinutes; time += slotIntervalMinutes) {
                 let hours = Math.floor(time / 60).toString().padStart(2, '0');
                 let mins = (time % 60).toString().padStart(2, '0');
                 let timeString = `${hours}:${mins}`;
@@ -324,7 +329,6 @@
                     btn.innerText = timeString;
                     btn.disabled = true;
                 } else if (isOnHold) {
-                    // Warna On Hold khusus TANPA teks tambahan di bawahnya
                     btn.className = "bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 cursor-not-allowed border border-yellow-600/40 text-xs py-2.5 rounded-lg font-mono opacity-90 flex items-center justify-center font-bold";
                     btn.innerText = timeString;
                     btn.disabled = true;
